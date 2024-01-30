@@ -10,10 +10,12 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     [Header("Movement")]
-    [SerializeField] float speed = 30f;
-    [SerializeField] float sprintSpeed = 2f;
-    [SerializeField] float jumpStrength = 900f;
-    [SerializeField] float MaxSpeed = 35f;
+    [SerializeField] float speed         = 30f;
+    [SerializeField] float sprintSpeed   = 2f;
+    [SerializeField] float jumpStrength  = 900f;
+    [SerializeField] float groundControl = 1f;
+    [SerializeField] float airControl    = 0.8f;
+    [SerializeField] float MaxSpeed      = 35f;
     [Header("Input")]
     [SerializeField] float sensitivity = 20f;
     [SerializeField] float maxLookUp = 90f;
@@ -30,6 +32,7 @@ public class PlayerController : MonoBehaviour
 
     Rigidbody rb;
     GameObject cam;
+    Camera camcomp;
     float xInput = 0f;
     float yInput = 0f;
     bool jump = false;
@@ -42,6 +45,7 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         cam = transform.GetChild(0).gameObject;
+        camcomp = cam.gameObject.GetComponent<Camera>();
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
         Cursor.lockState = CursorLockMode.Locked;
@@ -90,8 +94,9 @@ public class PlayerController : MonoBehaviour
 
         Vector3 force = new Vector3(0, 0, 0);
 
-        force += ((cam.transform.forward * yInput) + (cam.transform.right * xInput)) * speed * 0.01f * Mathf.Lerp(SprintSpeedLastUpdate, SprintSpeed, 0.8f) * (IsGrounded() ? 0.8f : 0.2f);
-        force = Vector3.ClampMagnitude(force, 1);
+        force += ((cam.transform.forward * yInput) + (cam.transform.right * xInput));
+        force = Vector3.ClampMagnitude(force, 1) * Mathf.Lerp(SprintSpeedLastUpdate, SprintSpeed, 0.8f);
+        force *= (IsGrounded() ? groundControl : airControl);
         force.y = 0;
         rb.AddForce(force, ForceMode.VelocityChange);
 
@@ -99,6 +104,14 @@ public class PlayerController : MonoBehaviour
         if (jump && IsGrounded())
         {
             rb.AddForce(new Vector3(0, jumpStrength * 100, 0) + rb.velocity * 0.2f, ForceMode.Force);
+        }
+        if (IsGrounded())
+        {
+            rb.drag = 5;
+        }
+        else
+        {
+            rb.drag = 0;
         }
         rb.velocity = Vector3.ClampMagnitude(rb.velocity, MaxSpeed);
     }
