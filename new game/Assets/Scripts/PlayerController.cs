@@ -10,9 +10,10 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     [Header("Movement")]
-    [SerializeField] float speed = 1f;
+    [SerializeField] float speed = 30f;
     [SerializeField] float sprintSpeed = 2f;
-    [SerializeField] float jumpStrength = 700f;
+    [SerializeField] float jumpStrength = 900f;
+    [SerializeField] float MaxSpeed = 35f;
     [Header("Input")]
     [SerializeField] float sensitivity = 20f;
     [SerializeField] float maxLookUp = 90f;
@@ -28,6 +29,7 @@ public class PlayerController : MonoBehaviour
     float YRotation = 0f;
 
     Rigidbody rb;
+    GameObject cam;
     float xInput = 0f;
     float yInput = 0f;
     bool jump = false;
@@ -39,7 +41,8 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        rb = this.transform.parent.GetComponent<Rigidbody>();
+        cam = transform.GetChild(0).gameObject;
+        rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -67,7 +70,7 @@ public class PlayerController : MonoBehaviour
 
     bool IsGrounded()
     {
-        return Physics.Raycast(transform.position - new Vector3(0, 1.7f, 0), -Vector3.up, 0.3f);
+        return Physics.Raycast(transform.position - new Vector3(0, .99f, 0), -Vector3.up, 0.3f);
     }
 
     public void RotationHandler()
@@ -78,19 +81,25 @@ public class PlayerController : MonoBehaviour
         XRotation += mousex;
         YRotation += mousey;
         YRotation = Mathf.Clamp(YRotation, maxLookDown, maxLookUp);
-        transform.rotation = Quaternion.Euler(new Vector3(-YRotation, XRotation, 0));
+        cam.transform.rotation = Quaternion.Euler(new Vector3(-YRotation, XRotation, 0));
     }
     public void MovementHandler()
     {
         SprintSpeed = (sprint ? sprintSpeed : speed);
         SprintSpeedLastUpdate = SprintSpeed;
-        float vy = rb.velocity.y;
-        rb.velocity = ((transform.forward * yInput) + (transform.right * xInput)) * Mathf.Lerp(SprintSpeedLastUpdate, SprintSpeed, 0.8f) * 10;
-        rb.velocity = new Vector3(rb.velocity.x, vy, rb.velocity.z);
+
+        Vector3 force = new Vector3(0, 0, 0);
+
+        force += ((cam.transform.forward * yInput) + (cam.transform.right * xInput)) * speed * 0.01f * Mathf.Lerp(SprintSpeedLastUpdate, SprintSpeed, 0.8f) * (IsGrounded() ? 0.8f : 0.2f);
+        force = Vector3.ClampMagnitude(force, 1);
+        force.y = 0;
+        rb.AddForce(force, ForceMode.VelocityChange);
+
         rb.AddForce(new Vector3(0, -gravity * 100, 0), ForceMode.Force);
         if (jump && IsGrounded())
         {
-            rb.AddForce(new Vector3(0, jumpStrength * 100, 0), ForceMode.Force);
+            rb.AddForce(new Vector3(0, jumpStrength * 100, 0) + rb.velocity * 0.2f, ForceMode.Force);
         }
+        rb.velocity = Vector3.ClampMagnitude(rb.velocity, MaxSpeed);
     }
 }
