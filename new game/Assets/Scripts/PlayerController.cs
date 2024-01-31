@@ -10,9 +10,9 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     [Header("Movement")]
-    [SerializeField] float speed         = 30f;
-    [SerializeField] float sprintSpeed   = 2f;
-    [SerializeField] float jumpStrength  = 900f;
+    [SerializeField] float speed         = 2.5f;
+    [SerializeField] float sprintSpeed   = 3.5f;
+    [SerializeField] float jumpStrength  = 700f;
     [SerializeField] float groundControl = 1f;
     [SerializeField] float airControl    = 0.8f;
     [SerializeField] float MaxSpeed      = 35f;
@@ -74,7 +74,13 @@ public class PlayerController : MonoBehaviour
 
     bool IsGrounded()
     {
-        return Physics.Raycast(transform.position - new Vector3(0, .99f, 0), -Vector3.up, 0.3f);
+        return Physics.BoxCast(
+            transform.position,
+            new Vector3(0.45f, 0.45f, 0.45f),
+            new Vector3(0, -1, 0),
+            Quaternion.identity,
+            1.1f
+            );
     }
 
     public void RotationHandler()
@@ -91,6 +97,7 @@ public class PlayerController : MonoBehaviour
     {
         SprintSpeed = (sprint ? sprintSpeed : speed);
         SprintSpeedLastUpdate = SprintSpeed;
+        Debug.Log(IsGrounded());
 
         Vector3 force = new Vector3(0, 0, 0);
 

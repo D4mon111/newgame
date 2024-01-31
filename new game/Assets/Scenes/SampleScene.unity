@@ -1195,11 +1195,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6c97183efec3a444bf7c8bf74821ff6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 2
-  sprintSpeed: 3
-  jumpStrength: 900
+  speed: 30
+  sprintSpeed: 2
+  jumpStrength: 700
   groundControl: 1
-  airControl: 0.2
+  airControl: 0.8
   MaxSpeed: 35
   sensitivity: 20
   maxLookUp: 90
