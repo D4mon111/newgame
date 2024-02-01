@@ -109,13 +109,6 @@ public class PlayerController : MonoBehaviour
         {
             rb.drag = 0;
         }
-        if (slide)
-        {
-            rb.drag = 0;
-            Vector3 direction = cam.transform.forward;
-            direction.y = 0; //no slidey into the sky
-            rb.AddForce(direction.normalized * slideSpeed, ForceMode.VelocityChange);
-        }
 
         Vector3 force = new Vector3(0, 0, 0);
         float clamperY = Convert.ToSingle(2 * (1 / (1 + Math.Exp(-MaxSpeed + Vector3.Project(rb.velocity, cam.transform.forward).magnitude))));
