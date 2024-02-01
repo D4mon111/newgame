@@ -5,17 +5,19 @@ using System.Text;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEditor.Build;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
     [Header("Movement")]
     [SerializeField] float speed         = 2.5f;
-    [SerializeField] float sprintSpeed   = 3.5f;
-    [SerializeField] float jumpStrength  = 700f;
-    [SerializeField] float groundControl = 1f;
-    [SerializeField] float airControl    = 0.8f;
-    [SerializeField] float MaxSpeed      = 35f;
+    [SerializeField] float sprintSpeed   = 4.5f;
+    [SerializeField] float slideSpeed    = 6f  ;
+    [SerializeField] float jumpStrength  = 400f;
+    [SerializeField] float groundControl = 1f  ;
+    [SerializeField] float airControl    = 0.2f;
+    [SerializeField] float MaxSpeed      = 35f ;
     [Header("Input")]
     [SerializeField] float sensitivity = 20f;
     [SerializeField] float maxLookUp = 90f;
@@ -32,11 +34,11 @@ public class PlayerController : MonoBehaviour
 
     Rigidbody rb;
     GameObject cam;
-    Camera camcomp;
     float xInput = 0f;
     float yInput = 0f;
     bool jump = false;
     bool sprint = false;
+    bool slide = false;
 
     float SprintSpeed = 0f;
     float SprintSpeedLastUpdate = 0f;
@@ -45,7 +47,6 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         cam = transform.GetChild(0).gameObject;
-        camcomp = cam.gameObject.GetComponent<Camera>();
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
         Cursor.lockState = CursorLockMode.Locked;
@@ -59,6 +60,7 @@ public class PlayerController : MonoBehaviour
         yInput = Input.GetAxis("Vertical");
         jump = Input.GetKey("space");
         sprint = Input.GetKey("left shift");
+        slide = Input.GetKey("left ctrl");
         if (rotatable) 
         {
             RotationHandler();
@@ -97,29 +99,33 @@ public class PlayerController : MonoBehaviour
     {
         SprintSpeed = (sprint ? sprintSpeed : speed);
         SprintSpeedLastUpdate = SprintSpeed;
-        Debug.Log(IsGrounded());
+
+        if (IsGrounded())
+        {
+            rb.drag = 5;
+            if (jump) { rb.AddForce(new Vector3(0, jumpStrength * 100, 0) + rb.velocity * 0.2f, ForceMode.Force); }
+        }
+        else
+        {
+            rb.drag = 0;
+        }
+        if (slide)
+        {
+            rb.drag = 0;
+            Vector3 direction = cam.transform.forward;
+            direction.y = 0; //no slidey into the sky
+            rb.AddForce(direction.normalized * slideSpeed, ForceMode.VelocityChange);
+        }
 
         Vector3 force = new Vector3(0, 0, 0);
+        float clamperY = Convert.ToSingle(2 * (1 / (1 + Math.Exp(-MaxSpeed + Vector3.Project(rb.velocity, cam.transform.forward).magnitude))));
 
-        force += ((cam.transform.forward * yInput) + (cam.transform.right * xInput));
+        force += ((cam.transform.forward * yInput * clamperY) + (cam.transform.right * xInput));
         force = Vector3.ClampMagnitude(force, 1) * Mathf.Lerp(SprintSpeedLastUpdate, SprintSpeed, 0.8f);
         force *= (IsGrounded() ? groundControl : airControl);
         force.y = 0;
         rb.AddForce(force, ForceMode.VelocityChange);
 
         rb.AddForce(new Vector3(0, -gravity * 100, 0), ForceMode.Force);
-        if (jump && IsGrounded())
-        {
-            rb.AddForce(new Vector3(0, jumpStrength * 100, 0) + rb.velocity * 0.2f, ForceMode.Force);
-        }
-        if (IsGrounded())
-        {
-            rb.drag = 5;
-        }
-        else
-        {
-            rb.drag = 0;
-        }
-        rb.velocity = Vector3.ClampMagnitude(rb.velocity, MaxSpeed);
     }
 }
