@@ -430,6 +430,7 @@ GameObject:
   - component: {fileID: 1811753767}
   - component: {fileID: 1811753771}
   - component: {fileID: 1811753772}
+  - component: {fileID: 1811753773}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -568,7 +569,6 @@ MonoBehaviour:
   speed: 2.5
   sprintSpeed: 3.5
   slideSpeed: 1.5
-  slideDecay: 0.01
   jumpStrength: 400
   groundControl: 1
   airControl: 0.2
@@ -579,6 +579,19 @@ MonoBehaviour:
   gravity: 40
   movable: 1
   rotatable: 1
+--- !u!114 &1811753773
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1811753766}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 159cf08aa66e9714cb9382467754e018, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  refreshRate: 0.5
 --- !u!1 &1876991010
 GameObject:
   m_ObjectHideFlags: 0
