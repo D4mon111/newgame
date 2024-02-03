@@ -27,6 +27,10 @@ public class PlayerController : MonoBehaviour
     [Header("Permissions")]
     [SerializeField] bool movable = true;
     [SerializeField] bool rotatable = true;
+    [Header("Controls")]
+    [SerializeField] KeyCode jumpkey = KeyCode.Space;
+    [SerializeField] KeyCode sprintkey = KeyCode.LeftShift;
+    [SerializeField] KeyCode slidekey = KeyCode.LeftControl;
 
 
     float XRotation = 0f;
@@ -58,9 +62,9 @@ public class PlayerController : MonoBehaviour
     {
         xInput = Input.GetAxis("Horizontal");
         yInput = Input.GetAxis("Vertical");
-        jump = Input.GetKey("space");
-        sprint = Input.GetKey("left shift");
-        slide = Input.GetKey("left ctrl");
+        jump = Input.GetKey(jumpkey);
+        sprint = Input.GetKey(sprintkey);
+        slide = Input.GetKey(slidekey);
         if (rotatable) 
         {
             RotationHandler();
