@@ -12,8 +12,7 @@ public class PlayerController : MonoBehaviour
 {
     [Header("Movement")]
     [SerializeField] float speed         = 2.5f;
-    [SerializeField] float sprintSpeed   = 4.5f;
-    [SerializeField] float slideSpeed    = 6f  ;
+    [SerializeField] float sprintSpeed   = 6.0f;
     [SerializeField] float jumpStrength  = 400f;
     [SerializeField] float groundControl = 1f  ;
     [SerializeField] float airControl    = 0.2f;
@@ -27,10 +26,11 @@ public class PlayerController : MonoBehaviour
     [Header("Permissions")]
     [SerializeField] bool movable = true;
     [SerializeField] bool rotatable = true;
+    [SerializeField] bool jumpable = true;
     [Header("Controls")]
     [SerializeField] KeyCode jumpkey = KeyCode.Space;
     [SerializeField] KeyCode sprintkey = KeyCode.LeftShift;
-    [SerializeField] KeyCode slidekey = KeyCode.LeftControl;
+    [SerializeField] KeyCode crouchkey = KeyCode.LeftControl;
 
 
     float XRotation = 0f;
@@ -42,7 +42,7 @@ public class PlayerController : MonoBehaviour
     float yInput = 0f;
     bool jump = false;
     bool sprint = false;
-    bool slide = false;
+    bool crouch = false;
 
     float SprintSpeed = 0f;
     float SprintSpeedLastUpdate = 0f;
@@ -64,7 +64,7 @@ public class PlayerController : MonoBehaviour
         yInput = Input.GetAxis("Vertical");
         jump = Input.GetKey(jumpkey);
         sprint = Input.GetKey(sprintkey);
-        slide = Input.GetKey(slidekey);
+        crouch = Input.GetKey(crouchkey);
         if (rotatable) 
         {
             RotationHandler();
@@ -82,8 +82,8 @@ public class PlayerController : MonoBehaviour
     {
         return Physics.BoxCast(
             transform.position,
-            new Vector3(0.45f, 0.45f, 0.45f),
-            new Vector3(0, -1, 0),
+            new Vector3(0.15f, 0.15f, 0.15f),
+            new Vector3(0, -0.26f, 0),
             Quaternion.identity,
             1.1f
             );
@@ -106,13 +106,14 @@ public class PlayerController : MonoBehaviour
 
         if (IsGrounded())
         {
-            rb.drag = 5;
-            if (jump) { rb.AddForce(new Vector3(0, jumpStrength * 100, 0) + rb.velocity * 0.2f, ForceMode.Force); }
+            rb.drag = 4.5f;
+            if (jump && jumpable) { rb.AddForce(new Vector3(0, jumpStrength * 100, 0) + rb.velocity * 0.2f, ForceMode.Force); }
         }
         else
         {
             rb.drag = 0;
         }
+
 
         Vector3 force = new Vector3(0, 0, 0);
         float clamperY = Convert.ToSingle(2 * (1 / (1 + Math.Exp(-MaxSpeed + Vector3.Project(rb.velocity, cam.transform.forward).magnitude))));
